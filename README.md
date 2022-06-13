@@ -19,8 +19,8 @@ Showcasing the Notion API with Node.js
 - [Introduction](#introduction)
 - [About](#about)
 - [Setup](#setup)
-- [Sources & References](#sources-&-references)
-- [Scripts](#Scripts,-APIs-&-More)
+- [References & Resources](#references-resources)
+- [Learn More](#learn-more)
 
 ## Introduction:
 
@@ -40,5 +40,5 @@ npm start
 ```
   
 ## References & Resources
-## Find More tutorials!
+## Learn More
   

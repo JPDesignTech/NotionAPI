@@ -1,0 +1,22 @@
+{
+  "name": "notionapi",
+  "version": "1.0.0",
+  "description": "An Example Project using Notion's API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JPDesignTech/NotionAPI.git"
+  },
+  "keywords": [
+    "notion"
+  ],
+  "author": "Jean",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JPDesignTech/NotionAPI/issues"
+  },
+  "homepage": "https://github.com/JPDesignTech/NotionAPI#readme"
+}

@@ -1,0 +1,11 @@
+
+dist
+dist/*
+./dist/*
+./app/dist/*
+build/*
+**/src/app/*.*.spec.ts
+app/*.*.spec.ts
+*.*.spec.ts
+*.spec.ts
+*.spec.*

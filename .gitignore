@@ -232,3 +232,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+#configuration
+/config/dev.ts
+/config/prod.ts
+/config/beta.ts

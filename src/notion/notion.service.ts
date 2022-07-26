@@ -4,6 +4,8 @@ import { UpdateNotionDto } from './dto/update-notion.dto';
 import { Client } from '@notionhq/client';
 import { EnvConfig } from 'src/interfaces/env-config.interface';
 import { AppService } from 'src/app.service';
+import { Book, ReadingStatus, Tags } from 'src/interfaces/book.interface';
+import { PageObjectResponse, PartialPageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 @Injectable()
 export class NotionService {
@@ -105,9 +107,73 @@ export class NotionService {
         ],
       });
 
-      console.log(`🐛 🐞  readingListProp ➡ ${JSON.stringify(dbQuery, null, 2)} 🐞 🐛 `);
-      return dbQuery;
-    } catch (error: any) {}
+      const queryResults: (PageObjectResponse | PartialPageObjectResponse)[] = dbQuery.results;
+      const allBooks: Book[] = [];
+      const booksPromise = queryResults.map(async (result: any) => {
+        const bookTags: Tags[] = [];
+        const bookAuthors: string[] = [];
+        let mediaType: string = '';
+        let readingStatus: ReadingStatus;
+        try {
+          const pageTitle: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'title',
+          });
+          const pageTags: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: "F'NS",
+          });
+          const pageAuthors: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'Q%3EBh',
+          });
+          const pageStatus: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'OU%3FW', //e0c70ac5-5ac5-4894-9abe-b4bb243c9c24
+          });
+          const pageMediaType: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'e0c70ac5-5ac5-4894-9abe-b4bb243c9c24',
+          });
+
+          pageTags.multi_select.map((tag: { name: string; color: string }) => {
+            bookTags.push({
+              name: tag.name,
+              color: tag.color,
+            });
+          });
+          pageAuthors.multi_select.map((author: { name: string }) => {
+            bookAuthors.push(author.name);
+          });
+
+          readingStatus = { name: pageStatus.select.name, color: pageStatus.select.color };
+          mediaType = pageMediaType.select.name;
+
+          if (pageTitle?.results[0].title.plain_text === undefined) return;
+
+          const book: Book = {
+            id: result.id,
+            bookCover: result.cover.external.url,
+            title: pageTitle.results[0].title.plain_text,
+            tags: bookTags,
+            authors: result.properties.author,
+            status: readingStatus,
+            mediaType,
+          };
+
+          return allBooks.push(book);
+        } catch (error: any) {
+          return;
+        }
+      });
+
+      await Promise.all(booksPromise);
+      console.log(`🐛 🐞 All Books ➡ ${JSON.stringify(allBooks, null, 2)} 🐞 🐛 `);
+      return allBooks;
+    } catch (error: any) {
+      console.log(`❗❗ Error  ➡ ${JSON.stringify(error, null, 2)}❗ ❗`);
+      return error;
+    }
   }
 
   findOne(id: number) {

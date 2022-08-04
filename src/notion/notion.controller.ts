@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { NotionService } from './notion.service';
 import { CreateNotionDto } from './dto/create-notion.dto';
 import { UpdateNotionDto } from './dto/update-notion.dto';
+import { BookDto } from 'src/interfaces/book.dto';
 
 @Controller('notion')
 export class NotionController {
@@ -21,6 +22,16 @@ export class NotionController {
   @Get('/readingList')
   findAllReadingList() {
     return this.notionService.findAllReadingList();
+  }
+
+  @Get('/checkReadingList')
+  checkReadingList() {
+    return this.notionService.checkReadingList();
+  }
+
+  @Post('/readingList')
+  addNewBookToFirestore(@Body() bookDto: BookDto) {
+    return this.notionService.addBook(bookDto);
   }
 
   @Get(':id')

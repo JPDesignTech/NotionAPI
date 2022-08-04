@@ -237,3 +237,4 @@ dist
 /config/dev.ts
 /config/prod.ts
 /config/beta.ts
+/private/

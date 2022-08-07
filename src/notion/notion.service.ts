@@ -10,6 +10,8 @@ import { PageObjectResponse, PartialPageObjectResponse } from '@notionhq/client/
 import { BookDto } from 'src/interfaces/book.dto';
 import { config } from '../../config/dev';
 import * as serviceAccount from '../../private/personalportfolio-4caf3-e397f4744ce4.json';
+import { VinylDto } from 'src/interfaces/vinyl.dto';
+import { Artist, Genre, Style, Vinyl } from 'src/interfaces/vinyl.interface';
 
 @Injectable()
 export class NotionService {
@@ -43,7 +45,6 @@ export class NotionService {
 
   onModuleInit() {
     this.notion = new Client({ auth: this.envConfig.notionAPI.notionIntegrationToken });
-    console.log(`🐛 🐞  notion ➡ ${JSON.stringify(this.notion, null, 2)} 🐞 🐛 `);
   }
 
   // Creates an Episode entry in the Database Table when a new session is schedule on SquadCast
@@ -200,6 +201,115 @@ export class NotionService {
     }
   }
 
+  async findAllVinys(): Promise<Vinyl[]> {
+    try {
+      const dbQuery = await this.notion.databases.query({
+        database_id: this.envConfig.notionAPI.vinylsDB,
+        filter: {
+          and: [
+            {
+              property: 'Status',
+              select: { equals: 'Wanted' },
+            },
+          ],
+        },
+        sorts: [
+          {
+            direction: 'ascending',
+            timestamp: 'created_time',
+          },
+        ],
+      });
+
+      const queryResults: (PageObjectResponse | PartialPageObjectResponse)[] = dbQuery.results;
+
+      const allVinyls: Vinyl[] = [];
+      const vinylsPromise = queryResults.map(async (result: any) => {
+        const vinylGenre: Genre[] = [];
+        const vinylArtist: Artist[] = [];
+        const vinylStyle: Style[] = [];
+
+        try {
+          const pageTitle: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'title',
+          });
+          const pageArtists: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'YEx%60',
+          });
+          const pageID: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: '%5BGY%5D',
+          });
+          const pageYear: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: '%60aKU',
+          });
+          const pageGenre: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'nuvb',
+          });
+          const pageStyle: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'WJbr',
+          });
+          const pageResourceURL: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'H%7B%5BV',
+          });
+          const pageCoverImg: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'Jqb%5D',
+          });
+
+          pageArtists.multi_select.map((tag: { name: string; color: string }) => {
+            vinylArtist.push({
+              name: tag.name,
+              color: tag.color,
+            });
+          });
+
+          pageGenre.multi_select.map((tag: { name: string; color: string }) => {
+            vinylGenre.push({
+              name: tag.name,
+              color: tag.color,
+            });
+          });
+
+          pageStyle.multi_select.map((tag: { name: string; color: string }) => {
+            vinylStyle.push({
+              name: tag.name,
+              color: tag.color,
+            });
+          });
+          // if (pageTitle?.results[0].title.plain_text === undefined) return;
+
+          const vinyl: Vinyl = {
+            id: pageID.results[0].rich_text.plain_text,
+            title: pageTitle.results[0].title.plain_text,
+            artists: vinylArtist,
+            genres: vinylGenre,
+            styles: vinylStyle,
+            year: pageYear.number,
+            resourceURL: pageResourceURL.url,
+            coverImg: pageCoverImg.url,
+            dateAdded: result.created_time,
+          };
+          return allVinyls.push(vinyl);
+        } catch (error: any) {
+          return;
+        }
+      });
+
+      await Promise.all(vinylsPromise);
+      return allVinyls;
+    } catch (error: any) {
+      console.log(`❗❗ Error  ➡ ${JSON.stringify(error, null, 2)}❗ ❗`);
+      return error;
+    }
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} notion`;
   }
@@ -214,6 +324,10 @@ export class NotionService {
 
   addBook(addBookDto: BookDto) {
     return `This action adds a book`;
+  }
+
+  addVinyl(addVinylDto: VinylDto) {
+    return `This action adds a vinyl`;
   }
 
   async checkReadingList(): Promise<string> {

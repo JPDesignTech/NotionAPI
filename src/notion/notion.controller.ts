@@ -3,15 +3,27 @@ import { NotionService } from './notion.service';
 import { CreateNotionDto } from './dto/create-notion.dto';
 import { UpdateNotionDto } from './dto/update-notion.dto';
 import { BookDto } from 'src/interfaces/book.dto';
+import { VinylDto } from 'src/interfaces/vinyl.dto';
 
 @Controller('notion')
 export class NotionController {
   constructor(private readonly notionService: NotionService) {}
 
-  @Post()
-  create(@Body() createNotionDto: any) {
+  @Post('/readingList')
+  addBook(@Body() createNotionDto: any) {
     console.log(`🐛 🐞  body ➡ ${JSON.stringify(createNotionDto, null, 2)} 🐞 🐛 `);
     // return this.notionService.create(createNotionDto);
+  }
+
+  @Post('/vinyls')
+  addVinyl(@Body() vinylDto: VinylDto) {
+    console.log(`🐛 🐞  vinylDto ➡ ${JSON.stringify(vinylDto, null, 2)} 🐞 🐛 `);
+    // return this.notionService.create(createNotionDto);
+  }
+
+  @Get('/vinyls')
+  findAllVinyls() {
+    return this.notionService.findAllVinys();
   }
 
   @Get()

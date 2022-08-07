@@ -1,4 +1,4 @@
-# <h1 align="left"><a href="https://notion.com" target="_blank" rel="noreferrer"> <img src="https://static.cdnlogo.com/logos/n/50/notion.svg" alt="notion" width="40" height="40"/></a>   Notion API <> Nest.js </h1>
+# <h1 ><a href="https://notion.com" target="_blank" rel="noreferrer"> <img align="left"src="https://static.cdnlogo.com/logos/n/50/notion.svg" alt="notion" width="40" height="40"/></a>   Notion API <> Nest.js </h1>
 Showcasing the Notion API with Nest.js
 
 [![shieldio made-with](https://img.shields.io/badge/Tag-v1.0.1-green)]() ![shieldio made-with](https://img.shields.io/badge/ProjectType-API%20Showcase-purple?logo=google-scholar&logoColor=white) [![shieldio made-with](https://img.shields.io/badge/Status-Completed-darkgreen)]() [![shieldio made-with](https://img.shields.io/badge/Hours_Log-14%20Hours-black)]() 

@@ -3,5 +3,6 @@ export interface EnvConfig {
     notionIntegrationToken: string;
     notionDBID: string;
     taskDB: string;
+    vinylsDB: string;
   };
 }

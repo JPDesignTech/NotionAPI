@@ -11,7 +11,7 @@ import { BookDto } from 'src/interfaces/book.dto';
 import { config } from '../../config/dev';
 import * as serviceAccount from '../../private/personalportfolio-4caf3-e397f4744ce4.json';
 import { VinylDto } from 'src/interfaces/vinyl.dto';
-import { Artist, Genre, Style, Vinyl } from 'src/interfaces/vinyl.interface';
+import { Artist, Genre, Status, Style, Vinyl } from 'src/interfaces/vinyl.interface';
 
 @Injectable()
 export class NotionService {
@@ -108,6 +108,10 @@ export class NotionService {
     return `This action returns all notion`;
   }
 
+  /**
+   * Finds all Books within the Notion Reading List Database
+   * @returns
+   */
   async findAllReadingList(): Promise<Book[]> {
     try {
       const response = await this.notion.databases.retrieve({ database_id: this.envConfig.notionAPI.taskDB });
@@ -201,7 +205,11 @@ export class NotionService {
     }
   }
 
-  async findAllVinys(): Promise<Vinyl[]> {
+  /**
+   * Finds all Vinyls with a certain status within the Notion Vinyl Collection Database
+   * @returns
+   * */
+  async findAllVinysByStatus(status: string): Promise<Vinyl[]> {
     try {
       const dbQuery = await this.notion.databases.query({
         database_id: this.envConfig.notionAPI.vinylsDB,
@@ -209,7 +217,7 @@ export class NotionService {
           and: [
             {
               property: 'Status',
-              select: { equals: 'Wanted' },
+              select: { equals: `${status}` },
             },
           ],
         },
@@ -305,6 +313,99 @@ export class NotionService {
       await Promise.all(vinylsPromise);
       return allVinyls;
     } catch (error: any) {
+      console.log(`❗❗ Error  ➡ ${JSON.stringify(error, null, 2)}❗ ❗`);
+      return error;
+    }
+  }
+
+  async addVinylByStatus(vinylDto: VinylDto) {
+    try {
+      const response = await this.notion.pages.create({
+        parent: { database_id: this.envConfig.notionAPI.vinylsDB },
+        properties: {
+          title: {
+            title: [
+              {
+                text: {
+                  content: vinylDto.title,
+                },
+              },
+            ],
+          },
+          Status: {
+            select: {
+              name: `${vinylDto.status.name}`,
+            },
+          },
+          ID: {
+            rich_text: [
+              {
+                text: {
+                  content: vinylDto.id,
+                },
+              },
+            ],
+            type: 'rich_text',
+          },
+          Genres: {
+            multi_select: vinylDto.genres?.map((genre: Genre) => {
+              if (!genre?.name) {
+                return { name: genre.toString() };
+              } else {
+                return {
+                  name: genre.name,
+                };
+              }
+            }),
+          },
+          Artists: {
+            multi_select: vinylDto.artists.map((artist: Artist) => {
+              if (!artist?.name) {
+                return { name: artist.toString() };
+              } else {
+                return {
+                  name: artist.name,
+                };
+              }
+            }),
+          },
+          Styles: {
+            multi_select: vinylDto.styles.map((style: Style) => {
+              if (!style?.name) {
+                return { name: style.toString() };
+              } else {
+                return {
+                  name: style.name,
+                };
+              }
+            }),
+          },
+          Year: {
+            number: vinylDto.year,
+          },
+          Resource: {
+            url: vinylDto.resourceURL,
+          },
+          'Cover Image': {
+            url: vinylDto.coverImg,
+          },
+        },
+        cover: {
+          type: 'external',
+          external: {
+            url: vinylDto.coverImg,
+          },
+        },
+        icon: {
+          type: 'external',
+          external: {
+            url: vinylDto.coverImg,
+          },
+        },
+      });
+      return response;
+    } catch (error: any) {
+      // console.log(`🐛 🐞 vinylDto ➡ ${JSON.stringify(vinylDto, null, 2)} 🐞 🐛 `);
       console.log(`❗❗ Error  ➡ ${JSON.stringify(error, null, 2)}❗ ❗`);
       return error;
     }

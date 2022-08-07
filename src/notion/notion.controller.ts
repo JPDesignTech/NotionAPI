@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { NotionService } from './notion.service';
 import { CreateNotionDto } from './dto/create-notion.dto';
 import { UpdateNotionDto } from './dto/update-notion.dto';
 import { BookDto } from 'src/interfaces/book.dto';
 import { VinylDto } from 'src/interfaces/vinyl.dto';
+import { Status } from 'src/interfaces/vinyl.interface';
 
 @Controller('notion')
 export class NotionController {
@@ -17,13 +18,12 @@ export class NotionController {
 
   @Post('/vinyls')
   addVinyl(@Body() vinylDto: VinylDto) {
-    console.log(`🐛 🐞  vinylDto ➡ ${JSON.stringify(vinylDto, null, 2)} 🐞 🐛 `);
-    // return this.notionService.create(createNotionDto);
+    return this.notionService.addVinylByStatus(vinylDto);
   }
 
-  @Get('/vinyls')
-  findAllVinyls() {
-    return this.notionService.findAllVinys();
+  @Get('/vinyls?')
+  findAllVinyls(@Query('status') status: string) {
+    return this.notionService.findAllVinysByStatus(status);
   }
 
   @Get()

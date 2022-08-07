@@ -1,3 +1,5 @@
+import { Artist, Genre, Status, Style } from './vinyl.interface';
+
 export class VinylDto {
   id: string;
   title?: string;
@@ -8,20 +10,5 @@ export class VinylDto {
   year?: number;
   coverImg?: string;
   dateAdded?: string;
-  status?: 'Preordered' | 'Owned' | 'Want';
-}
-
-interface Artist {
-  name: string;
-  color: string;
-}
-
-interface Genre {
-  name: string;
-  color: string;
-}
-
-interface Style {
-  name: string;
-  color: string;
+  status?: { name: Status; color: string };
 }

@@ -8,7 +8,7 @@ export class Vinyl {
   year?: number;
   coverImg?: string;
   dateAdded?: string;
-  status?: 'Preordered' | 'Owned' | 'Want';
+  status?: { name: Status; color: string };
 }
 
 export interface Artist {
@@ -24,4 +24,10 @@ export interface Genre {
 export interface Style {
   name: string;
   color: string;
+}
+
+export enum Status {
+  PREORDERED = 'Preordered',
+  OWNED = 'Owned',
+  WANTED = 'Wanted',
 }

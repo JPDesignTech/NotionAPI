@@ -230,7 +230,6 @@ export class NotionService {
       });
 
       const queryResults: (PageObjectResponse | PartialPageObjectResponse)[] = dbQuery.results;
-
       const allVinyls: Vinyl[] = [];
       const vinylsPromise = queryResults.map(async (result: any) => {
         const vinylGenre: Genre[] = [];
@@ -266,25 +265,26 @@ export class NotionService {
             page_id: result.id,
             property_id: 'H%7B%5BV',
           });
+          const pageStatus: any = await this.notion.pages.properties.retrieve({
+            page_id: result.id,
+            property_id: 'miEe',
+          });
           const pageCoverImg: any = await this.notion.pages.properties.retrieve({
             page_id: result.id,
             property_id: 'Jqb%5D',
           });
-
           pageArtists.multi_select.map((tag: { name: string; color: string }) => {
             vinylArtist.push({
               name: tag.name,
               color: tag.color,
             });
           });
-
           pageGenre.multi_select.map((tag: { name: string; color: string }) => {
             vinylGenre.push({
               name: tag.name,
               color: tag.color,
             });
           });
-
           pageStyle.multi_select.map((tag: { name: string; color: string }) => {
             vinylStyle.push({
               name: tag.name,
@@ -292,7 +292,6 @@ export class NotionService {
             });
           });
           // if (pageTitle?.results[0].title.plain_text === undefined) return;
-
           const vinyl: Vinyl = {
             id: pageID.results[0].rich_text.plain_text,
             title: pageTitle.results[0].title.plain_text,
@@ -303,6 +302,7 @@ export class NotionService {
             resourceURL: pageResourceURL.url,
             coverImg: pageCoverImg.url,
             dateAdded: result.created_time,
+            status: pageStatus.select,
           };
           return allVinyls.push(vinyl);
         } catch (error: any) {
@@ -318,6 +318,11 @@ export class NotionService {
     }
   }
 
+  /**
+   * Adds Vinyl to Notion DB
+   * @param vinylDto
+   * @returns
+   */
   async addVinylByStatus(vinylDto: VinylDto) {
     try {
       const response = await this.notion.pages.create({
@@ -411,26 +416,47 @@ export class NotionService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notion`;
+  /**
+   * Checks Firestore Vinyls Collection against Notion Vinyls Collection
+   * If there is a diff it will add it to FS.
+   * @param status
+   * @returns
+   */
+  async checkVinyls(status: string): Promise<any> {
+    const vinylsList: Vinyl[] = await this.findAllVinysByStatus(status);
+    const vinylsFromFirestore = await this.fs.collection('vinyls').get();
+    const vinylsFromFirestoreList: Vinyl[] = vinylsFromFirestore.docs.map((doc: any) => {
+      const fsVinyl: Vinyl = {
+        id: doc.id,
+        ...doc.data(),
+      };
+      return fsVinyl;
+    });
+
+    const vinylsPromise = vinylsList.map(async (vinyl: Vinyl) => {
+      const fsVinylIndex = vinylsFromFirestoreList.findIndex((fsVinyl: Vinyl) => fsVinyl.id === vinyl.id);
+      if (fsVinylIndex === -1) {
+        return await this.fs.collection('vinyls').doc(vinyl.id).set(vinyl, { merge: true });
+      } else {
+        return;
+      }
+    });
+
+    return await Promise.all(vinylsPromise)
+      .then(() => {
+        return 'Vinyls added to Firestore';
+      })
+      .catch((error) => {
+        console.log(`❗❗ Error  ➡ ${JSON.stringify(error.message, null, 2)}❗ ❗`);
+        return error.message;
+      });
   }
 
-  update(id: number, updateNotionDto: UpdateNotionDto) {
-    return `This action updates a #${id} notion`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} notion`;
-  }
-
-  addBook(addBookDto: BookDto) {
-    return `This action adds a book`;
-  }
-
-  addVinyl(addVinylDto: VinylDto) {
-    return `This action adds a vinyl`;
-  }
-
+  /**
+   * Checks Firestore Books Collection against Notion Books Collection
+   * If there is a diff it will add it to FS.
+   * @returns
+   */
   async checkReadingList(): Promise<string> {
     const readingList: Book[] = await this.findAllReadingList();
     // check firestore if there is a new entry in the readingList
@@ -457,5 +483,25 @@ export class NotionService {
         console.log(`❗❗ Error  ➡ ${JSON.stringify(error.message, null, 2)}❗ ❗`);
         return error.message;
       });
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} notion`;
+  }
+
+  update(id: number, updateNotionDto: UpdateNotionDto) {
+    return `This action updates a #${id} notion`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} notion`;
+  }
+
+  addBook(addBookDto: BookDto) {
+    return `This action adds a book`;
+  }
+
+  addVinyl(addVinylDto: VinylDto) {
+    return `This action adds a vinyl`;
   }
 }

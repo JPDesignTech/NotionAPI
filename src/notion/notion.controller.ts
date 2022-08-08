@@ -26,6 +26,11 @@ export class NotionController {
     return this.notionService.findAllVinysByStatus(status);
   }
 
+  @Get('/vinyls/check?')
+  checkVinyls(@Query('status') status: string) {
+    return this.notionService.checkVinyls(status);
+  }
+
   @Get()
   findAll() {
     return this.notionService.findAll();
@@ -36,7 +41,7 @@ export class NotionController {
     return this.notionService.findAllReadingList();
   }
 
-  @Get('/checkReadingList')
+  @Get('/readingList/check')
   checkReadingList() {
     return this.notionService.checkReadingList();
   }

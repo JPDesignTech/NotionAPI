@@ -10,12 +10,7 @@ import { Status } from 'src/interfaces/vinyl.interface';
 export class NotionController {
   constructor(private readonly notionService: NotionService) {}
 
-  @Post('/readingList')
-  addBook(@Body() createNotionDto: any) {
-    console.log(`🐛 🐞  body ➡ ${JSON.stringify(createNotionDto, null, 2)} 🐞 🐛 `);
-    // return this.notionService.create(createNotionDto);
-  }
-
+  // ============== VINYL ================== //
   @Post('/vinyls')
   addVinyl(@Body() vinylDto: VinylDto) {
     return this.notionService.addVinylByStatus(vinylDto);
@@ -36,6 +31,14 @@ export class NotionController {
     return this.notionService.findAll();
   }
 
+  // ======================================== //
+  // ============== READINGLIST ================== //
+  @Post('/readingList')
+  addBook(@Body() createNotionDto: any) {
+    console.log(`🐛 🐞  body ➡ ${JSON.stringify(createNotionDto, null, 2)} 🐞 🐛 `);
+    // return this.notionService.create(createNotionDto);
+  }
+
   @Get('/readingList')
   findAllReadingList() {
     return this.notionService.findAllReadingList();
@@ -50,6 +53,33 @@ export class NotionController {
   addNewBookToFirestore(@Body() bookDto: BookDto) {
     return this.notionService.addBook(bookDto);
   }
+  // ======================================== //
+  // ============== QUOTES ================== //
+  @Post('/readingList/quote')
+  addQuoteToFirestore(@Body() quoteDto: any) {
+    return this.notionService.addQuote(quoteDto);
+  }
+
+  @Get('/readingList/quote')
+  findAllQuotes() {
+    return this.notionService.findAllQuotes();
+  }
+
+  @Get('/readingList/quote:id')
+  findQuote(@Param('id') id: string) {
+    return this.notionService.findQuote(id);
+  }
+
+  @Patch('/readingList/quote:id')
+  updateQuote(@Param('id') id: string, @Body() quoteDto: any) {
+    return this.notionService.updateQuote(id, quoteDto);
+  }
+
+  @Delete('/readingList/quote:id')
+  deleteQuote(@Param('id') id: string) {
+    return this.notionService.deleteQuote(id);
+  }
+  // ======================================== //
 
   @Get(':id')
   findOne(@Param('id') id: string) {
